@@ -1,0 +1,154 @@
+$ git commit -m "starting scraper"
+[main 9c351f7] starting scraper
+ 4 files changed, 1136 insertions(+)
+ create mode 100644 ubc_scraper/README.md
+ create mode 100644 ubc_scraper/sample_scraper.py
+ create mode 100644 ubc_scraper/schema.sql
+ create mode 100644 ubc_scraper/scraper.py
+
+Karsten Kirby Uy@KarstenKirbyUy-Laptop MINGW64 ~/Documents/ubc_room_finder/ubc_scraper (main)
+$ python ./scraper.py 
+Starting Web Scraping of UBC Online Timetable
+SWS Vancouver - 3.1.0.0
+Selected all rooms via JS
+Selected 'All Day 07:00 - 22:00' option
+Selecting week: Week 6 w/c 22 Sep 2025
+Clicked 'Get Timetable' button
+Switched to new timetable window
+New page title: UBCSWSLocationIndividual
+Found 6 tables on the page
+Found room: ALRD 105
+Found room: ALRD 105
+Week start date (Actual Monday): 2025-09-22 (Original text date: 2025-09-22)
+Week start date (Actual Monday): 2025-09-22 (Original text date: 2025-09-22)
+Row 1 - Processing booking at col_ptr=5, cell_index=6
+Row 1 cells (Text, Rowspan): [('7:00', 1), ('', 1), ('', 1), ('', 1), ('', 1), ('', 1), ('Maintenance Saturday (week(s): September 22, 2025-September 29, 2025) 7:00 - ALRD 105, ALRD B101\n  WRB-ACTIVE\n6-7', 30), ('Maintenance Saturday (week(s): September 22, 2025-September 29, 2025) 7:00 - ALRD 105, ALRD B101', 1), ('', 1), ('WRB-ACTIVE', 1), ('6-7', 1), ('', 1)]
+weekday=Sat, offset=5
+Added booking: [ALRD 105] 2025-09-27 07:00:00 - 2025-09-27 22:00:00 | Maintenance Saturday (week(s): September 22, 2025-September 29, 2025) 7:00 - ALRD 105, ALRD B101
+  W | Unknown | MAINT
+Row 8 - Processing booking at col_ptr=1, cell_index=2
+Row 8 cells (Text, Rowspan): [('9:00', 1), ('', 1), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002\nAloni, Erez LEC\n3-16', 4), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002', 1), ('Aloni, Erez', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003\nHilland, Andrea LEC\n3-16', 3), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003', 1), ('Hilland, Andrea', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002\nAloni, Erez LEC\n3-16', 4), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002', 1), ('Aloni, Erez', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003\nHilland, Andrea LEC\n3-16', 3), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003', 1), ('Hilland, Andrea', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Tue, offset=1
+Added booking: [ALRD 105] 2025-09-23 09:00:00 - 2025-09-23 11:00:00 | LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002
+Aloni, Erez LEC
+3-16 | Unknown | LEC
+Row 8 - Processing booking at col_ptr=2, cell_index=7
+Row 8 cells (Text, Rowspan): [('9:00', 1), ('', 1), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002\nAloni, Erez LEC\n3-16', 4), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002', 1), ('Aloni, Erez', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003\nHilland, Andrea LEC\n3-16', 3), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003', 1), ('Hilland, Andrea', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002\nAloni, Erez LEC\n3-16', 4), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002', 1), ('Aloni, Erez', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003\nHilland, Andrea LEC\n3-16', 3), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003', 1), ('Hilland, Andrea', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Wed, offset=2
+Added booking: [ALRD 105] 2025-09-24 09:00:00 - 2025-09-24 10:30:00 | LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003
+Hilland, Andrea LEC
+3-16 | Unknown | LEC
+Row 8 - Processing booking at col_ptr=3, cell_index=12
+Row 8 cells (Text, Rowspan): [('9:00', 1), ('', 1), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002\nAloni, Erez LEC\n3-16', 4), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002', 1), ('Aloni, Erez', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003\nHilland, Andrea LEC\n3-16', 3), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003', 1), ('Hilland, Andrea', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002\nAloni, Erez LEC\n3-16', 4), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002', 1), ('Aloni, Erez', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003\nHilland, Andrea LEC\n3-16', 3), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003', 1), ('Hilland, Andrea', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Thu, offset=3
+Added booking: [ALRD 105] 2025-09-25 09:00:00 - 2025-09-25 11:00:00 | LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002
+Aloni, Erez LEC
+3-16 | Unknown | LEC
+Row 8 - Processing booking at col_ptr=4, cell_index=17
+Row 8 cells (Text, Rowspan): [('9:00', 1), ('', 1), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002\nAloni, Erez LEC\n3-16', 4), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002', 1), ('Aloni, Erez', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003\nHilland, Andrea LEC\n3-16', 3), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003', 1), ('Hilland, Andrea', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002\nAloni, Erez LEC\n3-16', 4), ('LAW_V 559D-W/LEC/002, LAW_V 359C-W/LEC/002', 1), ('Aloni, Erez', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003\nHilland, Andrea LEC\n3-16', 3), ('LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003', 1), ('Hilland, Andrea', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Fri, offset=4
+Added booking: [ALRD 105] 2025-09-26 09:00:00 - 2025-09-26 10:30:00 | LAW_V 468-W/LEC/003, LAW_V 588-W/LEC/003
+Hilland, Andrea LEC
+3-16 | Unknown | LEC
+Row 21 - Processing booking at col_ptr=0, cell_index=1
+Row 21 cells (Text, Rowspan): [('9:30', 1), ('LAW_V 468-W/LEC/004, LAW_V 588-W/LEC/004\nGoldbach, Toby LEC\n3-16', 6), ('LAW_V 468-W/LEC/004, LAW_V 588-W/LEC/004', 
+1), ('Goldbach, Toby', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Mon, offset=0
+Added booking: [ALRD 105] 2025-09-22 09:30:00 - 2025-09-22 12:30:00 | LAW_V 468-W/LEC/004, LAW_V 588-W/LEC/004
+Goldbach, Toby LEC
+3-16 | Unknown | LEC
+Row 26 - Processing booking at col_ptr=1, cell_index=1
+Row 26 cells (Text, Rowspan): [('10:30', 1), ('LAW_V 476C-W/LEC/002, LAW_V 507-W/LEC/002\nCunliffe, Emma LEC\n3-16', 4), ('LAW_V 476C-W/LEC/002, LAW_V 507-W/LEC/002', 1), ('Cunliffe, Emma', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 476C-W/LEC/002, LAW_V 507-W/LEC/002\nCunliffe, Emma LEC\n3-16', 4), ('LAW_V 476C-W/LEC/002, LAW_V 507-W/LEC/002', 1), ('Cunliffe, Emma', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Tue, offset=1
+Added booking: [ALRD 105] 2025-09-23 10:30:00 - 2025-09-23 12:30:00 | LAW_V 476C-W/LEC/002, LAW_V 507-W/LEC/002
+Cunliffe, Emma LEC
+3-16 | Unknown | LEC
+Row 26 - Processing booking at col_ptr=2, cell_index=6
+Row 26 cells (Text, Rowspan): [('10:30', 1), ('LAW_V 476C-W/LEC/002, LAW_V 507-W/LEC/002\nCunliffe, Emma LEC\n3-16', 4), ('LAW_V 476C-W/LEC/002, LAW_V 507-W/LEC/002', 1), ('Cunliffe, Emma', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 476C-W/LEC/002, LAW_V 507-W/LEC/002\nCunliffe, Emma LEC\n3-16', 4), ('LAW_V 476C-W/LEC/002, LAW_V 507-W/LEC/002', 1), ('Cunliffe, Emma', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Wed, offset=2
+Added booking: [ALRD 105] 2025-09-24 10:30:00 - 2025-09-24 12:30:00 | LAW_V 476C-W/LEC/002, LAW_V 507-W/LEC/002
+Cunliffe, Emma LEC
+3-16 | Unknown | LEC
+Row 33 - Processing booking at col_ptr=0, cell_index=1
+Row 33 cells (Text, Rowspan): [('11:00', 1), ('LAW_V 300-W/LEC/003\nStewart, James LEC\n3-16', 3), ('LAW_V 300-W/LEC/003', 1), ('Stewart, James', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 300-W/LEC/003\nStewart, James LEC\n3-16', 3), ('LAW_V 300-W/LEC/003', 1), ('Stewart, James', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Mon, offset=0
+Added booking: [ALRD 105] 2025-09-22 11:00:00 - 2025-09-22 12:30:00 | LAW_V 300-W/LEC/003
+Stewart, James LEC
+3-16 | Unknown | LEC
+Row 33 - Processing booking at col_ptr=3, cell_index=6
+Row 33 cells (Text, Rowspan): [('11:00', 1), ('LAW_V 300-W/LEC/003\nStewart, James LEC\n3-16', 3), ('LAW_V 300-W/LEC/003', 1), ('Stewart, James', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 300-W/LEC/003\nStewart, James LEC\n3-16', 3), ('LAW_V 300-W/LEC/003', 1), ('Stewart, James', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Thu, offset=3
+Added booking: [ALRD 105] 2025-09-25 11:00:00 - 2025-09-25 12:30:00 | LAW_V 300-W/LEC/003
+Stewart, James LEC
+3-16 | Unknown | LEC
+Row 42 - Processing booking at col_ptr=0, cell_index=1
+Row 42 cells (Text, Rowspan): [('12:30', 1), ('SOCI_V 384-W/LEC/101\n  LEC\n3-16', 3), ('SOCI_V 384-W/LEC/101', 1), ('', 1), ('LEC', 1), ('3-16', 1), ('', 1), ('SOCI_V 384-W/LEC/101\n  LEC\n3-16', 3), ('SOCI_V 384-W/LEC/101', 1), ('', 1), ('LEC', 1), ('3-16', 1), ('', 1), ('', 1), ('', 1)]
+weekday=Mon, offset=0
+Added booking: [ALRD 105] 2025-09-22 12:30:00 - 2025-09-22 14:00:00 | SOCI_V 384-W/LEC/101
+  LEC
+3-16 | Unknown | LEC
+Row 50 - Processing booking at col_ptr=2, cell_index=3
+Row 50 cells (Text, Rowspan): [('13:30', 1), ('', 1), ('', 1), ('LAW_V 459C-W/LEC/001, LAW_V 508D-W/LEC/001\nHutchison, Camden LEC\n3-16', 4), ('LAW_V 459C-W/LEC/001, LAW_V 508D-W/LEC/001', 1), ('Hutchison, Camden', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Wed, offset=2
+Added booking: [ALRD 105] 2025-09-24 13:30:00 - 2025-09-24 15:30:00 | LAW_V 459C-W/LEC/001, LAW_V 508D-W/LEC/001
+Hutchison, Camden LEC
+3-16 | Unknown | LEC
+Row 54 - Processing booking at col_ptr=0, cell_index=1
+Row 54 cells (Text, Rowspan): [('14:00', 1), ('ASIA_V 328-W/LEC/011\nAhmed, Rumee LEC\n3-16', 6), ('ASIA_V 328-W/LEC/011', 1), ('Ahmed, Rumee', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 231-W/LEC/002\nPavlich, Dennis LEC\n3-16', 3), ('LAW_V 231-W/LEC/002', 1), ('Pavlich, Dennis', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 459C-W/LEC/001, LAW_V 508D-W/LEC/001\nHutchison, Camden LEC\n3-16', 4), ('LAW_V 459C-W/LEC/001, LAW_V 508D-W/LEC/001', 1), ('Hutchison, Camden', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 231-W/LEC/002\nPavlich, Dennis LEC\n3-16', 3), ('LAW_V 231-W/LEC/002', 1), ('Pavlich, Dennis', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Mon, offset=0
+Added booking: [ALRD 105] 2025-09-22 14:00:00 - 2025-09-22 17:00:00 | ASIA_V 328-W/LEC/011
+Ahmed, Rumee LEC
+3-16 | Unknown | LEC
+Row 54 - Processing booking at col_ptr=1, cell_index=6
+Row 54 cells (Text, Rowspan): [('14:00', 1), ('ASIA_V 328-W/LEC/011\nAhmed, Rumee LEC\n3-16', 6), ('ASIA_V 328-W/LEC/011', 1), ('Ahmed, Rumee', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 231-W/LEC/002\nPavlich, Dennis LEC\n3-16', 3), ('LAW_V 231-W/LEC/002', 1), ('Pavlich, Dennis', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 459C-W/LEC/001, LAW_V 508D-W/LEC/001\nHutchison, Camden LEC\n3-16', 4), ('LAW_V 459C-W/LEC/001, LAW_V 508D-W/LEC/001', 1), ('Hutchison, Camden', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 231-W/LEC/002\nPavlich, Dennis LEC\n3-16', 3), ('LAW_V 231-W/LEC/002', 1), ('Pavlich, Dennis', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Tue, offset=1
+Added booking: [ALRD 105] 2025-09-23 14:00:00 - 2025-09-23 15:30:00 | LAW_V 231-W/LEC/002
+Pavlich, Dennis LEC
+3-16 | Unknown | LEC
+Row 54 - Processing booking at col_ptr=3, cell_index=11
+Row 54 cells (Text, Rowspan): [('14:00', 1), ('ASIA_V 328-W/LEC/011\nAhmed, Rumee LEC\n3-16', 6), ('ASIA_V 328-W/LEC/011', 1), ('Ahmed, Rumee', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 231-W/LEC/002\nPavlich, Dennis LEC\n3-16', 3), ('LAW_V 231-W/LEC/002', 1), ('Pavlich, Dennis', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 459C-W/LEC/001, LAW_V 508D-W/LEC/001\nHutchison, Camden LEC\n3-16', 4), ('LAW_V 459C-W/LEC/001, LAW_V 508D-W/LEC/001', 1), ('Hutchison, Camden', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 231-W/LEC/002\nPavlich, Dennis LEC\n3-16', 3), ('LAW_V 231-W/LEC/002', 1), ('Pavlich, Dennis', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Thu, offset=3
+Added booking: [ALRD 105] 2025-09-25 14:00:00 - 2025-09-25 16:00:00 | LAW_V 459C-W/LEC/001, LAW_V 508D-W/LEC/001
+Hutchison, Camden LEC
+3-16 | Unknown | LEC
+Row 54 - Processing booking at col_ptr=4, cell_index=16
+Row 54 cells (Text, Rowspan): [('14:00', 1), ('ASIA_V 328-W/LEC/011\nAhmed, Rumee LEC\n3-16', 6), ('ASIA_V 328-W/LEC/011', 1), ('Ahmed, Rumee', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 231-W/LEC/002\nPavlich, Dennis LEC\n3-16', 3), ('LAW_V 231-W/LEC/002', 1), ('Pavlich, Dennis', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 459C-W/LEC/001, LAW_V 508D-W/LEC/001\nHutchison, Camden LEC\n3-16', 4), ('LAW_V 459C-W/LEC/001, LAW_V 508D-W/LEC/001', 1), ('Hutchison, Camden', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 231-W/LEC/002\nPavlich, Dennis LEC\n3-16', 3), ('LAW_V 231-W/LEC/002', 1), ('Pavlich, Dennis', 1), ('LEC', 1), ('3-16', 1), ('', 1)]
+weekday=Fri, offset=4
+Added booking: [ALRD 105] 2025-09-26 14:00:00 - 2025-09-26 15:30:00 | LAW_V 231-W/LEC/002
+Pavlich, Dennis LEC
+3-16 | Unknown | LEC
+Row 69 - Processing booking at col_ptr=0, cell_index=1
+Row 69 cells (Text, Rowspan): [('15:30', 1), ('SOCI_V 387-W/LEC/101\nRichardson, Lindsey LEC\n3-16', 3), ('SOCI_V 387-W/LEC/101', 1), ('Richardson, Lindsey', 1), ('LEC', 1), ('3-16', 1), ('SOCI_V 387-W/LEC/101\nRichardson, Lindsey LEC\n3-16', 3), ('SOCI_V 387-W/LEC/101', 1), ('Richardson, Lindsey', 1), ('LEC', 1), ('3-16', 1), ('', 1), ('', 1)]
+weekday=Mon, offset=0
+Added booking: [ALRD 105] 2025-09-22 15:30:00 - 2025-09-22 17:00:00 | SOCI_V 387-W/LEC/101
+Richardson, Lindsey LEC
+3-16 | Unknown | LEC
+Row 69 - Processing booking at col_ptr=1, cell_index=6
+Row 69 cells (Text, Rowspan): [('15:30', 1), ('SOCI_V 387-W/LEC/101\nRichardson, Lindsey LEC\n3-16', 3), ('SOCI_V 387-W/LEC/101', 1), ('Richardson, Lindsey', 1), ('LEC', 1), ('3-16', 1), ('SOCI_V 387-W/LEC/101\nRichardson, Lindsey LEC\n3-16', 3), ('SOCI_V 387-W/LEC/101', 1), ('Richardson, Lindsey', 1), ('LEC', 1), ('3-16', 1), ('', 1), ('', 1)]
+weekday=Tue, offset=1
+Added booking: [ALRD 105] 2025-09-23 15:30:00 - 2025-09-23 17:00:00 | SOCI_V 387-W/LEC/101
+Richardson, Lindsey LEC
+3-16 | Unknown | LEC
+Row 80 - Processing booking at col_ptr=0, cell_index=1
+Row 80 cells (Text, Rowspan): [('18:00', 1), ('LAW_V 540-W/LEC/001, LAW_V 440-W/LEC/001\nGubeli, Aaron, Bank, Jordan LEC\n3-16', 6), ('LAW_V 540-W/LEC/001, LAW_V 440-W/LEC/001', 1), ('Gubeli, Aaron, Bank, Jordan', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 469-W/LEC/001, LAW_V 590-W/LEC/001\nCampbell, Jessica, Wells, Nathan LEC\n3-16', 6), ('LAW_V 469-W/LEC/001, LAW_V 590-W/LEC/001', 1), ('Campbell, Jessica, Wells, Nathan', 1), ('LEC', 1), ('3-16', 1), ('', 1), ('WRDS_V 150-W/LEC/R/3-HR\nKarpe, Rohan LEC\n3-16', 6), ('WRDS_V 150-W/LEC/R/3-HR', 1), ('Karpe, Rohan', 1), ('LEC', 1), ('3-16', 1), ('', 1), ('', 1)]
+weekday=Mon, offset=0
+Added booking: [ALRD 105] 2025-09-22 18:00:00 - 2025-09-22 21:00:00 | LAW_V 540-W/LEC/001, LAW_V 440-W/LEC/001
+Gubeli, Aaron, Bank, Jordan LEC
+3-16 | Unknown | LEC
+Row 80 - Processing booking at col_ptr=1, cell_index=6
+Row 80 cells (Text, Rowspan): [('18:00', 1), ('LAW_V 540-W/LEC/001, LAW_V 440-W/LEC/001\nGubeli, Aaron, Bank, Jordan LEC\n3-16', 6), ('LAW_V 540-W/LEC/001, LAW_V 440-W/LEC/001', 1), ('Gubeli, Aaron, Bank, Jordan', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 469-W/LEC/001, LAW_V 590-W/LEC/001\nCampbell, Jessica, Wells, Nathan LEC\n3-16', 6), ('LAW_V 469-W/LEC/001, LAW_V 590-W/LEC/001', 1), ('Campbell, Jessica, Wells, Nathan', 1), ('LEC', 1), ('3-16', 1), ('', 1), ('WRDS_V 150-W/LEC/R/3-HR\nKarpe, Rohan LEC\n3-16', 6), ('WRDS_V 150-W/LEC/R/3-HR', 1), ('Karpe, Rohan', 1), ('LEC', 1), ('3-16', 1), ('', 1), ('', 1)]
+weekday=Tue, offset=1
+Added booking: [ALRD 105] 2025-09-23 18:00:00 - 2025-09-23 21:00:00 | LAW_V 469-W/LEC/001, LAW_V 590-W/LEC/001
+Campbell, Jessica, Wells, Nathan LEC
+3-16 | Unknown | LEC
+Row 80 - Processing booking at col_ptr=3, cell_index=12
+Row 80 cells (Text, Rowspan): [('18:00', 1), ('LAW_V 540-W/LEC/001, LAW_V 440-W/LEC/001\nGubeli, Aaron, Bank, Jordan LEC\n3-16', 6), ('LAW_V 540-W/LEC/001, LAW_V 440-W/LEC/001', 1), ('Gubeli, Aaron, Bank, Jordan', 1), ('LEC', 1), ('3-16', 1), ('LAW_V 469-W/LEC/001, LAW_V 590-W/LEC/001\nCampbell, Jessica, Wells, Nathan LEC\n3-16', 6), ('LAW_V 469-W/LEC/001, LAW_V 590-W/LEC/001', 1), ('Campbell, Jessica, Wells, Nathan', 1), ('LEC', 1), ('3-16', 1), ('', 1), ('WRDS_V 150-W/LEC/R/3-HR\nKarpe, Rohan LEC\n3-16', 6), ('WRDS_V 150-W/LEC/R/3-HR', 1), ('Karpe, Rohan', 1), ('LEC', 1), ('3-16', 1), ('', 1), ('', 1)]
+weekday=Thu, offset=3
+Added booking: [ALRD 105] 2025-09-25 18:00:00 - 2025-09-25 21:00:00 | WRDS_V 150-W/LEC/R/3-HR
+Karpe, Rohan LEC
+3-16 | Unknown | LEC
+
+Total bookings found: 21
+
+✅ Successfully exported 21 SQL INSERT statements to 'C:\Users\karst\Documents\ubc_room_finder\ubc_scraper\timetable_bookings_insert.sql'
+Press Enter to exit...

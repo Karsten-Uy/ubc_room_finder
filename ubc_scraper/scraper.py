@@ -25,646 +25,70 @@ driver = webdriver.Chrome()
 # =============================================
 # HELPER FUNCTIONS
 
-# def parse_timetable():
-#     print("New page title:", driver.title)
-
-#     tables = driver.find_elements(By.XPATH, '/html/body/table')
-#     print(f"Found {len(tables)} tables on the page")
-
-#     for idx, table in enumerate(tables, start=1):
-#         print(f"\nParsing table index: {idx}")
-
-#         rows = table.find_elements(By.XPATH, ".//tr")
-
-#         # if idx % 2 == 1:
-#         if False:
-#             # Only extract room info for odd-index tables
-#             for row_index, row in enumerate(rows):
-#                 cells = row.find_elements(By.XPATH, ".//td")
-#                 if not cells:
-#                     continue
-
-#                 # Combine all cell text for regex
-#                 row_text = " ".join([cell.text.strip() for cell in cells])
-
-#                 match = re.search(r'Location Timetable:\s*([A-Z]+)\s*(\d+)', row_text)
-#                 if match:
-#                     building = match.group(1)
-#                     room_number = match.group(2)
-#                     print(f"Found room: {building} {room_number}")
-
-#         else:
-#             # Process other tables normally
-#             for row_index, row in enumerate(rows):
-#                 cells = row.find_elements(By.XPATH, ".//td")
-#                 row_data = [(cell.text.strip(), int(cell.get_attribute("rowspan") or 1)) for cell in cells]
-#                 print(f"Row {row_index}: {row_data}")
-
-#     input("Press Enter to exit...")
-
-
-# def parse_timetable():
-#     print("New page title:", driver.title)
-
-#     tables = driver.find_elements(By.XPATH, '/html/body/table')
-#     print(f"Found {len(tables)} tables on the page")
-
-#     bookings = []
-
-#     current_room = None
-#     week_start_date = None
-#     weekday_headers = []
-
-#     # Track ongoing rowspans per column (Mon=0, Tue=1, etc.)
-#     active_rowspans = [] 
+def escape_sql_string(text):
+    """Escapes single quotes for use in SQL string literals."""
+    if text is None:
+        return ''
     
-#     # Store the actual timestamp string for each half-hour row
-#     time_slots_list = [] 
+    # Ensure text is a string
+    cleaned_text = str(text)
     
-#     # Define a set of weekday names for offset calculation
-#     WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    # 1. Remove all newline characters (\n), carriage returns (\r), and tabs (\t)
+    # Using re.sub is robust for all forms of whitespace control characters
+    cleaned_text = re.sub(r'[\n\r\t]+', ' ', cleaned_text)
 
-#     for idx, table in enumerate(tables, start=1):
-#         # We only care about the timetable grid (even index tables)
-#         if idx % 2 == 1:
-#             # --- PHASE 1: Extract Room and Week Date (Odd Tables) ---
-#             rows = table.find_elements(By.XPATH, ".//tr")
-#             for row in rows:
-#                 row_text = row.text.strip()
-#                 if not row_text:
-#                     continue
-                
-#                 match_room = re.search(r'Location Timetable:\s*([A-Z]+)\s*(\d+)', row_text)
-#                 if match_room:
-#                     building = match_room.group(1)
-#                     room_number = match_room.group(2)
-#                     current_room = (building, room_number)
-#                     print(f"Found room: {current_room[0]} {current_room[1]}")
-
-#                 match_week = re.search(r'Exported Weeks:\d+,\s*(\d{2}/\d{2}/\d{2})', row_text)
-#                 if match_week:
-#                     week_start_date = datetime.strptime(match_week.group(1), "%m/%d/%y")
-#                     print(f"Week start date: {week_start_date.date()}")
-#             continue # Move to the next table
-
-#         # --- PHASE 2: Process Timetable Grid (Even Tables) ---
-#         if not current_room or not week_start_date:
-#             print("Skipping timetable grid: Missing room or week start date.")
-#             continue
-
-#         rows = table.find_elements(By.XPATH, ".//tr")
-#         time_slots_list = []
-
-#         for row_index, row in enumerate(rows):
-#             cells = row.find_elements(By.XPATH, ".//td")
-            
-#             # Extract cell data with rowspan
-#             row_data = [(cell.text.strip(), int(cell.get_attribute("rowspan") or 1)) for cell in cells]
-
-#             if row_index == 0:
-#                 # Row 0: Weekday headers (skip first cell which is empty/header)
-#                 weekday_headers = [cell[0] for cell in row_data[1:]]
-#                 active_rowspans = [0] * len(weekday_headers)
-#                 continue
-
-#             # First cell is the time slot
-#             time_text = row_data[0][0]
-#             if re.match(r'^\d{1,2}:\d{2}$', time_text):
-#                 time_slots_list.append(time_text)
-            
-#             # If we couldn't parse the time, we can't process this row's bookings
-#             if not time_slots_list: 
-#                 continue
-            
-#             # Get the current time slot string
-#             start_time_str = time_slots_list[-1]
-
-#             col_ptr = 0        # pointer to the actual weekday column (Mon=0, Tue=1, etc.)
-#             cell_index = 1     # pointer to the index in row_data (skipping the time column)
-
-#             while col_ptr < len(weekday_headers):
-                
-#                 # 1. Check for active rowspan: Column is blocked
-#                 if active_rowspans[col_ptr] > 0:
-#                     active_rowspans[col_ptr] -= 1
-#                     col_ptr += 1 # Move to the next weekday column
-#                     continue
-                
-#                 # 2. Process a new cell if available
-#                 if cell_index < len(row_data):
-#                     cell_text, rowspan = row_data[cell_index]
-                    
-#                     # Heuristic check for the main booking cell vs. redundant cells:
-#                     # A cell is a *new* booking if it has content AND either:
-#                     #   a) It has a rowspan > 1 (main block cell), OR
-#                     #   b) It has a rowspan of 1 and contains the essential course ID structure (e.g. 'LAW_V')
-#                     #
-#                     # The safest bet is to check if it contains the full, multi-line description,
-#                     # which only the "main" cell seems to have (from Row 5 data: '...\nAloni, Erez LEC\n3-16')
-                    
-#                     is_main_booking_cell = (rowspan > 1 and cell_text) or ('\n' in cell_text and cell_text.count('\n') >= 2)
-
-#                     if is_main_booking_cell:
-#                         # --- BOOKING EXTRACTION ---
-                        
-#                         # Determine the date
-#                         weekday_offset = col_ptr
-#                         weekday_name = weekday_headers[col_ptr]
-#                         try:
-#                              weekday_offset = WEEKDAYS.index(weekday_name)
-#                         except ValueError:
-#                              print(f"Warning: Could not match weekday {weekday_name}. Assuming offset {col_ptr}.")
-                        
-#                         booking_date = week_start_date + timedelta(days=weekday_offset)
-                        
-#                         # Calculate start/end datetime
-#                         time_slot_obj = datetime.strptime(start_time_str, "%H:%M").time()
-#                         start_datetime = datetime.combine(booking_date.date(), time_slot_obj)
-                        
-#                         duration = timedelta(minutes=30 * rowspan)
-#                         end_datetime = start_datetime + duration
-                        
-#                         # Extract booking details (using the robust regex from before)
-#                         match_details = re.search(
-#                             r'(.+?)\s*/([A-Z0-9]+)\s*/(\d+)\s*\n' 
-#                             r'([^\n]*)\n' 
-#                             r'([A-Z]+)\n' 
-#                             r'(\d+-\d+)',
-#                             cell_text, re.DOTALL | re.MULTILINE
-#                         )
-                        
-#                         course_code = 'N/A'
-#                         instructor = 'Unknown'
-#                         booking_type = 'OTHER'
-                        
-#                         if match_details:
-#                             full_course_id = match_details.group(1).strip()
-#                             course_type_section = match_details.group(2).strip()
-#                             course_code = f"{full_course_id}/{course_type_section}/{match_details.group(3).strip()}"
-                            
-#                             instructor = match_details.group(4).strip()
-#                             if not instructor or instructor.isspace():
-#                                 instructor = 'Unknown'
-
-#                             booking_type = match_details.group(5).strip()
-#                         else:
-#                             # Handle bookings like 'MAINT' or simple one-line entries
-#                             if 'MAINT' in cell_text.upper():
-#                                 booking_type = 'MAINT'
-#                                 course_code = cell_text[:100]
-#                             elif 'LEC' in cell_text.upper():
-#                                 booking_type = 'LEC'
-#                                 course_code = cell_text[:100]
+    # 2. Replace single quotes with '' to escape them for SQL
+    return cleaned_text.replace("'", "''")
 
 
-#                         bookings.append({
-#                             "room_number": current_room[1],
-#                             "building": current_room[0],
-#                             "start_time": start_datetime.strftime('%Y-%m-%d %H:%M:%S'),
-#                             "end_time": end_datetime.strftime('%Y-%m-%d %H:%M:%S'),
-#                             "course_code": course_code,
-#                             "instructor": instructor,
-#                             "booking_type": booking_type,
-#                             "raw_text": cell_text
-#                         })
-
-#                         # --- GRID UPDATE ---
-#                         active_rowspans[col_ptr] = rowspan - 1 # Current row is counted as 1
-                    
-#                     # Always move to the next cell in row_data regardless of whether we processed it as a booking
-#                     # This consumes the cells, including the redundant ones (rowspan=1) that follow a main booking.
-#                     cell_index += 1
-#                     col_ptr += 1 # Move to the next weekday column
-                
-#                 else:
-#                     # No more cells in row_data for this row
-#                     break 
-
-#     print(f"\nTotal bookings found: {len(bookings)}")
+def export_bookings_to_sql(bookings, filename):
+    """Generates SQL INSERT statements and writes them to a file."""
     
-#     if bookings:
-#         # --- Change 1: Show ALL bookings, not just the first 5 ---
-#         print("\n--- SQL INSERT Statements (All Bookings) ---")
-#         for booking in bookings: # Removed [:5]
-#             print(f"INSERT INTO Bookings (room_number, building, start_time, end_time, course_code, instructor, booking_type) VALUES ({booking['room_number']}, '{booking['building']}', '{booking['start_time']}', '{booking['end_time']}', '{booking['course_code']}', '{booking['instructor']}', '{booking['booking_type']}');")
+    sql_statements = []
+    
+    # Define the target table and columns
+    TABLE_NAME = "Bookings"
+    COLUMNS = [
+        "room_number", 
+        "building", 
+        "start_time", 
+        "end_time", 
+        "course_code", 
+        "instructor", 
+        "booking_type"
+    ]
+    
+    column_list = ", ".join(COLUMNS)
+    
+    for booking in bookings:
+        # Prepare values, ensuring strings are escaped and quoted
+        values = [
+            # room_number is often a string, so we'll quote it and escape it for safety
+            f"'{escape_sql_string(booking['room_number'])}'", 
+            f"'{escape_sql_string(booking['building'])}'",
+            f"'{booking['start_time']}'",  # DATETIME/TIMESTAMP should be quoted
+            f"'{booking['end_time']}'",    # DATETIME/TIMESTAMP should be quoted
+            f"'{escape_sql_string(booking['course_code'])}'",
+            f"'{escape_sql_string(booking['instructor'])}'",
+            f"'{escape_sql_string(booking['booking_type'])}'",
+        ]
         
-#         # --- Change 2: Show ALL bookings & include END TIME in summary ---
-#         print("\n--- Raw Data Check (All Bookings) ---")
-#         for booking in bookings: # Removed [:5]
-#             # Use the single-line raw text variable
-#             raw_text_single_line = booking['raw_text'].replace('\n', ' ')
-            
-#             # Added end_time to the summary line
-#             print(f"[{booking['building']} {booking['room_number']} / {booking['start_time']} - {booking['end_time']} / {booking['course_code']}] - Raw: {raw_text_single_line}")
-    
-#     input("Press Enter to exit...") # Keep this commented if the original code handles it outside
-#     return bookings
-
-
-
-# def parse_timetable():
-#     print("New page title:", driver.title)
-
-#     tables = driver.find_elements(By.XPATH, '/html/body/table')
-#     print(f"Found {len(tables)} tables on the page")
-
-#     bookings = []
-
-#     current_room = None
-#     week_start_date = None
-#     weekday_headers = []
-
-#     # Track ongoing rowspans per column (Mon=0, Tue=1, etc.)
-#     active_rowspans = [] 
-    
-#     # Store the actual timestamp string for each half-hour row
-#     time_slots_list = [] 
-    
-#     # Define a set of weekday names for offset calculation
-#     WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-
-#     for idx, table in enumerate(tables, start=1):
-#         # We only care about the timetable grid (even index tables)
-#         if idx % 2 == 1:
-#             # --- PHASE 1: Extract Room and Week Date (Odd Tables) ---
-#             rows = table.find_elements(By.XPATH, ".//tr")
-#             for row in rows:
-#                 row_text = row.text.strip()
-#                 if not row_text:
-#                     continue
-                
-#                 match_room = re.search(r'Location Timetable:\s*([A-Z]+)\s*(\d+)', row_text)
-#                 if match_room:
-#                     building = match_room.group(1)
-#                     room_number = match_room.group(2)
-#                     current_room = (building, room_number)
-#                     print(f"Found room: {current_room[0]} {current_room[1]}")
-
-#                 match_week = re.search(r'Exported Weeks:\d+,\s*(\d{2}/\d{2}/\d{2})', row_text)
-#                 if match_week:
-#                     # 1. Parse the date string provided by the website (e.g., 09/01/25)
-#                     date_from_text = datetime.strptime(match_week.group(1), "%m/%d/%y")
-                    
-#                     # 2. FIX: Calculate the actual Monday of that week
-#                     # weekday() returns 0 for Monday, 1 for Tuesday, ..., 6 for Sunday.
-#                     days_to_subtract = date_from_text.weekday()
-                    
-#                     # 3. Set the true week_start_date (guaranteed Monday)
-#                     week_start_date = date_from_text - timedelta(days=days_to_subtract)
-                    
-#                     print(f"Week start date (Actual Monday): {week_start_date.date()} (Original text date: {date_from_text.date()})")
-#             continue # Move to the next table
-
-#         # --- PHASE 2: Process Timetable Grid (Even Tables) ---
-#         if not current_room or not week_start_date:
-#             print("Skipping timetable grid: Missing room or week start date.")
-#             continue
-
-#         rows = table.find_elements(By.XPATH, ".//tr")
-#         time_slots_list = []
-
-#         for row_index, row in enumerate(rows):
-#             cells = row.find_elements(By.XPATH, ".//td")
-            
-#             # Extract cell data with rowspan
-#             row_data = [(cell.text.strip(), int(cell.get_attribute("rowspan") or 1)) for cell in cells]
-
-#             if row_index == 0:
-#                 # Row 0: Weekday headers (skip first cell which is empty/header)
-#                 weekday_headers = [cell[0] for cell in row_data[1:]]
-#                 active_rowspans = [0] * len(weekday_headers)
-#                 continue
-
-#             # First cell is the time slot
-#             time_text = row_data[0][0]
-#             if re.match(r'^\d{1,2}:\d{2}$', time_text):
-#                 time_slots_list.append(time_text)
-            
-#             if not time_slots_list: 
-#                 continue
-            
-#             # Get the current time slot string
-#             start_time_str = time_slots_list[-1]
-
-#             col_ptr = 0        # pointer to the actual weekday column (Mon=0, Tue=1, etc.)
-#             cell_index = 1     # pointer to the index in row_data (skipping the time column)
-
-#             while col_ptr < len(weekday_headers):
-                
-#                 # 1. Check for active rowspan: Column is blocked
-#                 if active_rowspans[col_ptr] > 0:
-#                     active_rowspans[col_ptr] -= 1
-#                     col_ptr += 1 # Move to the next weekday column
-#                     continue
-                
-#                 # 2. Process a new cell if available
-#                 if cell_index < len(row_data):
-#                     cell_text, rowspan = row_data[cell_index]
-                    
-#                     # Heuristic check for the main booking cell vs. redundant cells:
-#                     is_main_booking_cell = (rowspan > 1 and cell_text) or ('\n' in cell_text and cell_text.count('\n') >= 2)
-
-#                     if is_main_booking_cell:
-#                         # --- BOOKING EXTRACTION ---
-                        
-#                         # Determine the date (week_start_date is guaranteed to be Monday)
-#                         weekday_offset = col_ptr
-#                         weekday_name = weekday_headers[col_ptr]
-#                         try:
-#                              weekday_offset = WEEKDAYS.index(weekday_name)
-#                         except ValueError:
-#                              print(f"Warning: Could not match weekday {weekday_name}. Assuming offset {col_ptr}.")
-                             
-                        
-#                         # Use the true Monday start date + the day offset
-#                         booking_date = week_start_date + timedelta(days=weekday_offset)
-                        
-#                         # Calculate start/end datetime
-#                         time_slot_obj = datetime.strptime(start_time_str, "%H:%M").time()
-#                         start_datetime = datetime.combine(booking_date.date(), time_slot_obj)
-                        
-#                         duration = timedelta(minutes=30 * rowspan)
-#                         end_datetime = start_datetime + duration
-                        
-#                         # Extract booking details (regex)
-#                         match_details = re.search(
-#                             r'(.+?)\s*/([A-Z0-9]+)\s*/(\d+)\s*\n' 
-#                             r'([^\n]*)\n' 
-#                             r'([A-Z]+)\n' 
-#                             r'(\d+-\d+)',
-#                             cell_text, re.DOTALL | re.MULTILINE
-#                         )
-                        
-#                         course_code = 'N/A'
-#                         instructor = 'Unknown'
-#                         booking_type = 'OTHER'
-                        
-#                         if match_details:
-#                             full_course_id = match_details.group(1).strip()
-#                             course_type_section = match_details.group(2).strip()
-#                             course_code = f"{full_course_id}/{course_type_section}/{match_details.group(3).strip()}"
-                            
-#                             instructor = match_details.group(4).strip()
-#                             if not instructor or instructor.isspace():
-#                                 instructor = 'Unknown'
-
-#                             booking_type = match_details.group(5).strip()
-#                         else:
-#                             # Handle non-standard bookings
-#                             if 'MAINT' in cell_text.upper():
-#                                 booking_type = 'MAINT'
-#                                 course_code = cell_text[:100]
-#                             elif 'LEC' in cell_text.upper():
-#                                 booking_type = 'LEC'
-#                                 course_code = cell_text[:100]
-
-
-#                         bookings.append({
-#                             "room_number": current_room[1],
-#                             "building": current_room[0],
-#                             "start_time": start_datetime.strftime('%Y-%m-%d %H:%M:%S'),
-#                             "end_time": end_datetime.strftime('%Y-%m-%d %H:%M:%S'),
-#                             "course_code": course_code,
-#                             "instructor": instructor,
-#                             "booking_type": booking_type,
-#                             "raw_text": cell_text
-#                         })
-
-#                         # --- GRID UPDATE ---
-#                         active_rowspans[col_ptr] = rowspan - 1 # Current row is counted as 1
-                    
-#                     # Always advance cell_index to consume the current cell in row_data
-#                     cell_index += 1
-#                     col_ptr += 1 # Move to the next weekday column
-                
-#                 else:
-#                     # No more cells in row_data for this row
-#                     break 
-
-#     print(f"\nTotal bookings found: {len(bookings)}")
-    
-#     if bookings:
-#         # --- SQL INSERT Statements (All Bookings) ---
-#         print("\n--- SQL INSERT Statements (All Bookings) ---")
-#         for booking in bookings: 
-#             print(f"INSERT INTO Bookings (room_number, building, start_time, end_time, course_code, instructor, booking_type) VALUES ({booking['room_number']}, '{booking['building']}', '{booking['start_time']}', '{booking['end_time']}', '{booking['course_code']}', '{booking['instructor']}', '{booking['booking_type']}');")
+        values_list = ", ".join(values)
         
-#         # --- Raw Data Check (All Bookings) ---
-#         print("\n--- Raw Data Check (All Bookings) ---")
-#         for booking in bookings: 
-#             # FIX: Use replace('\\n', ' ') to avoid SyntaxError
-#             raw_text_single_line = booking['raw_text'].replace('\n', ' ')
+        # Construct the full INSERT statement
+        sql = f"INSERT INTO {TABLE_NAME} ({column_list}) VALUES ({values_list});"
+        sql_statements.append(sql)
+
+    try:
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(f"-- SQL INSERT Statements generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"-- Target Table: {TABLE_NAME}\n\n")
+            f.write("\n".join(sql_statements))
             
-#             print(f"[{booking['building']} {booking['room_number']} / {booking['start_time']} - {booking['end_time']} / {booking['course_code']}] - Raw: {raw_text_single_line}")
-    
-#     input("Press Enter to exit...") 
-#     return bookings
+        print(f"\n✅ Successfully exported {len(sql_statements)} SQL INSERT statements to '{os.path.abspath(filename)}'")
 
-# def parse_timetable():
-#     print("New page title:", driver.title)
-
-#     tables = driver.find_elements(By.XPATH, '/html/body/table')
-#     print(f"Found {len(tables)} tables on the page")
-
-#     bookings = []
-
-#     current_room = None
-#     week_start_date = None
-#     weekday_headers = []
-
-#     # Track ongoing rowspans per column (Mon=0, Tue=1, etc.)
-#     active_rowspans = [] 
-    
-#     # Store the actual timestamp string for each half-hour row
-#     time_slots_list = [] 
-    
-#     # Define a set of weekday names for offset calculation
-#     WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-
-#     for idx, table in enumerate(tables, start=1):
-#         # We only care about the timetable grid (even index tables)
-#         if idx % 2 == 1:
-#             # --- PHASE 1: Extract Room and Week Date (Odd Tables) ---
-#             rows = table.find_elements(By.XPATH, ".//tr")
-#             for row in rows:
-#                 row_text = row.text.strip()
-#                 if not row_text:
-#                     continue
-                
-#                 match_room = re.search(r'Location Timetable:\s*([A-Z]+)\s*(\d+)', row_text)
-#                 if match_room:
-#                     building = match_room.group(1)
-#                     room_number = match_room.group(2)
-#                     current_room = (building, room_number)
-#                     print(f"Found room: {current_room[0]} {current_room[1]}")
-
-#                 match_week = re.search(r'Exported Weeks:\d+,\s*(\d{2}/\d{2}/\d{2})', row_text)
-#                 if match_week:
-#                     # 1. Parse the date string provided by the website (e.g., 09/01/25)
-#                     date_from_text = datetime.strptime(match_week.group(1), "%m/%d/%y")
-                    
-#                     # 2. FIX: Calculate the actual Monday of that week
-#                     # weekday() returns 0 for Monday, 1 for Tuesday, ..., 6 for Sunday.
-#                     days_to_subtract = date_from_text.weekday()
-                    
-#                     # 3. Set the true week_start_date (guaranteed Monday)
-#                     week_start_date = date_from_text - timedelta(days=days_to_subtract)
-                    
-#                     print(f"Week start date (Actual Monday): {week_start_date.date()} (Original text date: {date_from_text.date()})")
-#             continue # Move to the next table
-
-#         # --- PHASE 2: Process Timetable Grid (Even Tables) ---
-#         if not current_room or not week_start_date:
-#             print("Skipping timetable grid: Missing room or week start date.")
-#             continue
-
-#         rows = table.find_elements(By.XPATH, ".//tr")
-#         time_slots_list = []
-
-#         for row_index, row in enumerate(rows):
-#             cells = row.find_elements(By.XPATH, ".//td")
-            
-#             # Extract cell data with rowspan
-#             row_data = [(cell.text.strip(), int(cell.get_attribute("rowspan") or 1)) for cell in cells]
-            
-
-#             if row_index == 0:
-#                 # Row 0: Weekday headers (skip first cell which is empty/header)
-#                 weekday_headers = [cell[0] for cell in row_data[1:]]
-#                 active_rowspans = [0] * len(weekday_headers)
-#                 continue
-
-#             # First cell is the time slot
-#             time_text = row_data[0][0]
-#             if re.match(r'^\d{1,2}:\d{2}$', time_text):
-#                 time_slots_list.append(time_text)
-
-#             print(time_slots_list)
-            
-#             if not time_slots_list:
-#                 continue
-
-#             if not re.match(r'^\d{1,2}:\d{2}$', time_text):
-#                 continue
-
-#             print(f"Row {row_index} cells (Text, Rowspan): {row_data}")
-            
-#             # Get the current time slot string
-#             start_time_str = time_slots_list[-1]
-
-#             col_ptr = 0 # pointer to the actual weekday column (Mon=0, Tue=1, etc.)
-#             cell_index = 1 # pointer to the index in row_data (skipping the time column)
-
-#             while col_ptr < len(weekday_headers):
-                
-#                 # 1. Check for active rowspan: Column is blocked
-#                 if active_rowspans[col_ptr] > 0:
-#                     active_rowspans[col_ptr] -= 1
-#                     col_ptr += 1 # Move to the next weekday column
-#                     continue
-                
-#                 # 2. Process a new cell if available
-#                 if cell_index < len(row_data):
-#                     cell_text, rowspan = row_data[cell_index]
-                    
-#                     # Heuristic check for the main booking cell vs. redundant cells:
-#                     is_main_booking_cell = (rowspan > 1 and cell_text) or ('\n' in cell_text and cell_text.count('\n') >= 2)
-
-#                     if is_main_booking_cell:
-#                         # --- BOOKING EXTRACTION ---
-                        
-#                         # Determine the date (week_start_date is guaranteed to be Monday)
-#                         weekday_offset = col_ptr
-#                         weekday_name = weekday_headers[col_ptr]
-#                         try:
-#                             weekday_offset = WEEKDAYS.index(weekday_name)
-#                         except ValueError:
-#                             print(f"Warning: Could not match weekday {weekday_name}. Assuming offset {col_ptr}.")
-                            
-                        
-#                         # Use the true Monday start date + the day offset
-#                         booking_date = week_start_date + timedelta(days=weekday_offset)
-                        
-#                         # Calculate start/end datetime
-#                         time_slot_obj = datetime.strptime(start_time_str, "%H:%M").time()
-#                         start_datetime = datetime.combine(booking_date.date(), time_slot_obj)
-                        
-#                         duration = timedelta(minutes=30 * rowspan)
-#                         end_datetime = start_datetime + duration
-                        
-#                         # Extract booking details (regex)
-#                         match_details = re.search(
-#                             r'(.+?)\s*/([A-Z0-9]+)\s*/(\d+)\s*\n' 
-#                             r'([^\n]*)\n' 
-#                             r'([A-Z]+)\n' 
-#                             r'(\d+-\d+)',
-#                             cell_text, re.DOTALL | re.MULTILINE
-#                         )
-                        
-#                         course_code = 'N/A'
-#                         instructor = 'Unknown'
-#                         booking_type = 'OTHER'
-                        
-#                         if match_details:
-#                             full_course_id = match_details.group(1).strip()
-#                             course_type_section = match_details.group(2).strip()
-#                             course_code = f"{full_course_id}/{course_type_section}/{match_details.group(3).strip()}"
-                            
-#                             instructor = match_details.group(4).strip()
-#                             if not instructor or instructor.isspace():
-#                                 instructor = 'Unknown'
-
-#                             booking_type = match_details.group(5).strip()
-#                         else:
-#                             # Handle non-standard bookings
-#                             if 'MAINT' in cell_text.upper():
-#                                 booking_type = 'MAINT'
-#                                 course_code = cell_text[:100]
-#                             elif 'LEC' in cell_text.upper():
-#                                 booking_type = 'LEC'
-#                                 course_code = cell_text[:100]
-
-
-#                         bookings.append({
-#                             "room_number": current_room[1],
-#                             "building": current_room[0],
-#                             "start_time": start_datetime.strftime('%Y-%m-%d %H:%M:%S'),
-#                             "end_time": end_datetime.strftime('%Y-%m-%d %H:%M:%S'),
-#                             "course_code": course_code,
-#                             "instructor": instructor,
-#                             "booking_type": booking_type,
-#                             "raw_text": cell_text
-#                         })
-
-#                         # --- GRID UPDATE ---
-#                         active_rowspans[col_ptr] = rowspan - 1 # Current row is counted as 1
-                    
-#                     # Always advance cell_index to consume the current cell in row_data
-#                     cell_index += 1
-#                     col_ptr += 1 # Move to the next weekday column
-                
-#                 else:
-#                     # No more cells in row_data for this row
-#                     break 
-
-#     print(f"\nTotal bookings found: {len(bookings)}")
-    
-#     if bookings:
-#         # --- SQL INSERT Statements (All Bookings) ---
-#         print("\n--- SQL INSERT Statements (All Bookings) ---")
-#         for booking in bookings: 
-#             print(f"INSERT INTO Bookings (room_number, building, start_time, end_time, course_code, instructor, booking_type) VALUES ({booking['room_number']}, '{booking['building']}', '{booking['start_time']}', '{booking['end_time']}', '{booking['course_code']}', '{booking['instructor']}', '{booking['booking_type']}');")
-        
-#         # --- Raw Data Check (All Bookings) ---
-#         print("\n--- Raw Data Check (All Bookings) ---")
-#         for booking in bookings: 
-#             # FIX: Use replace('\\n', ' ') to avoid SyntaxError
-#             raw_text_single_line = booking['raw_text'].replace('\n', ' ')
-            
-#             print(f"[{booking['building']} {booking['room_number']} / {booking['start_time']} - {booking['end_time']} / {booking['course_code']}] - Raw: {raw_text_single_line}")
-    
-#     input("Press Enter to exit...") 
-#     return bookings
+    except IOError as e:
+        print(f"\n❌ Error writing to file {filename}: {e}")
 
 def parse_timetable():
     print("New page title:", driver.title)
@@ -866,16 +290,24 @@ def parse_timetable():
 
                         # --- GRID UPDATE ---
                         active_rowspans[col_ptr] = rowspan - 1 # Current row is counted as 1
-
-                        # NEW: Skip the fragment cells that follow this main booking
-                        # Consume cells until we hit another cell with rowspan > 1 or run out
+   
+                        # ADVANCE CELL POINTER AND SKIP FRAGMENTS
                         cell_index += 1
+                        # print(f"len(row_data) = {len(row_data)}")
+                        # print(f"cell_index    = {cell_index}")
                         while cell_index < len(row_data):
                             next_text, next_rowspan = row_data[cell_index]
-                            if next_rowspan > 1 or not next_text:  # Hit next main booking or empty cell
+                            
+                            # Only stop skipping if we hit the start of the next main booking (rowspan > 1) 
+                            # or if the cell is non-fragmentary (has substantial content).
+                            if next_rowspan > 1 or (next_rowspan == 1 and next_text and next_text.count('\n') >= 2):
+                                # print("Breaking here")
                                 break
-                            cell_index += 1  # Skip this fragment
+                                
+                            # print(f"skipping {next_text}")
+                            cell_index += 1 # Skip this fragment
                         
+                        # ADVANCE COLUMN POINTER
                         col_ptr += 1
                     else:
                         # Empty cell or already-skipped fragment
@@ -897,10 +329,11 @@ def parse_timetable():
     
     if bookings:
         # --- SQL INSERT Statements (All Bookings) ---
-        print("\n--- SQL INSERT Statements (All Bookings) ---")
-        for booking in bookings: 
-            print(f"INSERT INTO Bookings (room_number, building, start_time, end_time, course_code, instructor, booking_type) VALUES ({booking['room_number']}, '{booking['building']}', '{booking['start_time']}', '{booking['end_time']}', '{booking['course_code']}', '{booking['instructor']}', '{booking['booking_type']}');")
-        
+        # print("\n--- SQL INSERT Statements (All Bookings) ---")
+        # for booking in bookings: 
+        #     print(f"INSERT INTO Bookings (room_number, building, start_time, end_time, course_code, instructor, booking_type) VALUES ({booking['room_number']}, '{booking['building']}', '{booking['start_time']}', '{booking['end_time']}', '{booking['course_code']}', '{booking['instructor']}', '{booking['booking_type']}');")
+        export_bookings_to_sql(bookings, OUTPUT_SQL_FILENAME)
+
     input("Press Enter to exit...") 
     return bookings
 
