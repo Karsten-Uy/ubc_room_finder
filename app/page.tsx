@@ -15,26 +15,15 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center">
       <div className="flex-1 w-full flex flex-col gap-5 items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-4xl flex justify-between items-center text-sm">
-            {/* Left side: Title */}
-            <div className="flex gap-5 items-center font-semibold">
-              <h1 className="text-3xl font-bold py-1">UBC Free Room Finder</h1>
-            </div>
-
-            {/* Right side: Report Issue Button */}
-            <div>
-              <a
-                href="https://forms.gle/Q11hjrXg4bS2XjKt5"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
-              >
-                Report Issue
-              </a>
-            </div>
-          </div>
+        <nav className="w-full flex justify-center border-b border-b-foreground/10 p-4">
+          <div className="w-full max-w-4xl flex flex-col sm:flex-row justify-between items-center gap-2">
+            {/* Title */}
+            <h1 className="text-2xl sm:text-3xl font-bold text-center sm:text-left">
+              UBC Free Room Finder
+            </h1> 
+          </div>           
         </nav>
+
 
         <DisclaimerWidget />
 
@@ -53,6 +42,16 @@ export default function Home() {
             </a>
           </p>
           <ThemeSwitcher />
+          {/* Report Issue Button */}
+            <a
+              href="https://forms.gle/Q11hjrXg4bS2XjKt5"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 sm:mt-0 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-sm sm:text-base text-center"
+            >
+              <span className="sm:hidden">Report</span>
+              <span className="hidden sm:inline">Report Issue</span>
+            </a>
         </footer>
       </div>
     </main>
