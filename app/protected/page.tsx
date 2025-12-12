@@ -5,8 +5,6 @@ import { InfoIcon } from "lucide-react";
 import { FetchDataSteps } from "@/components/tutorial/fetch-data-steps";
 import { Suspense } from "react";
 
-import FreeRoomsPage  from "@/components/FreeRoomsPage";
-
 async function UserDetails() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getClaims();
@@ -37,7 +35,6 @@ export default function ProtectedPage() {
         </pre>
       </div>
       <div>
-        <FreeRoomsPage />
         <h2 className="font-bold text-2xl mb-4">Next steps</h2>
         <FetchDataSteps />
       </div>

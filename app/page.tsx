@@ -9,37 +9,34 @@ import { hasEnvVars } from "@/lib/utils";
 import Link from "next/link";
 import { Suspense } from "react";
 import FreeRoomsWidget  from "@/components/FreeRoomsWidget";
+import DisclaimerWidget  from "@/components/DisclaimerWidget";
 
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center">
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
+      <div className="flex-1 w-full flex flex-col gap-5 items-center">
         <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
+          <div className="w-full max-w-4xl flex justify-between items-center text-sm">
+            {/* Left side: Title */}
             <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"}>UBC Free Room Finder</Link>
-              <div className="flex items-center gap-2">
-                <DeployButton />
-              </div>
+              <h1 className="text-3xl font-bold py-1">UBC Free Room Finder</h1>
             </div>
-            {/* {!hasEnvVars ? (
-              <EnvVarWarning />
-            ) : (
-              <Suspense>
-                <AuthButton />
-              </Suspense>
-            )} */}
+
+            {/* Right side: Report Issue Button */}
+            <div>
+              <a
+                href="https://forms.gle/Q11hjrXg4bS2XjKt5"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+              >
+                Report Issue
+              </a>
+            </div>
           </div>
         </nav>
-        {/* <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-          <Hero />
-          <main className="flex-1 flex flex-col gap-6 px-4">
-            <h2 className="font-medium text-xl mb-4">Next steps</h2>
-            {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
-          </main>
-        </div> */}
 
-        {/* <h className="font-medium text-xl mb-4">Next steps</h2> */}
+        <DisclaimerWidget />
 
         <FreeRoomsWidget />
 
