@@ -7,7 +7,7 @@ CREATE TABLE Rooms (
     room_number INT,
     building VARCHAR(50),
     capacity INT,
-    feautures VARCHAR(1000),
+    features VARCHAR(1000),
     PRIMARY KEY (room_number,building)
 );
 
@@ -24,29 +24,15 @@ CREATE TABLE Bookings (
     booking_type VARCHAR(20) -- e.g., LEC, MAINT
 );
 
-INSERT INTO Rooms (room_number, building, capacity, feautures) VALUES
-(101, 'ALRD', 94, 'Tables, AC Power, Projector, Whiteboard, Document Camera'),
-(102, 'ALRD', 60, 'Tables, AC Power, Projector, Whiteboard'),
-(105, 'ALRD', 60, 'Tables, AC Power, Projector, Whiteboard'),
-(201, 'LAW', 120, 'Theater seating, AC Power, Projector'),
-(202, 'LAW', 80, 'Tables, AC Power, Whiteboard'),
-(301, 'SOCI', 50, 'Tables, AC Power, Projector, Whiteboard');
-
-INSERT INTO Bookings (room_number, building, start_time, end_time, course_code, instructor, booking_type) VALUES
-(101, 'ALRD', '2025-10-11 09:00:00', '2025-10-11 10:30:00', 'LAW_V 559D', 'Aloni, Erez', 'LEC'),
-(101, 'ALRD', '2025-10-11 13:30:00', '2025-10-11 15:00:00', 'LAW_V 459C', 'Hutchison, Camden', 'LEC'),
-(102, 'ALRD', '2025-10-11 08:00:00', '2025-10-11 09:00:00', 'SOCI_V 384', 'Smith, Jane', 'LEC'),
-(201, 'LAW', '2025-10-11 10:00:00', '2025-10-11 12:00:00', 'LAW_V 468', 'Goldbach, Toby', 'LEC'),
-(301, 'SOCI', '2025-10-11 11:30:00', '2025-10-11 12:30:00', 'SOCI_V 387', 'Richardson, Lindsey', 'LEC');
 
 -- Find Rooms that are free given a time range
--- SELECT R.room_number, R.building, R.capacity, R.feautures
--- FROM Rooms R
--- LEFT JOIN Bookings B
---     ON R.room_number = B.room_number
---     AND R.building = B.building
---     AND NOT (B.end_time <= '2025-10-11 09:00:00' OR B.start_time >= '2025-10-11 10:00:00')
--- WHERE B.booking_id IS NULL;
+SELECT R.room_number, R.building, R.capacity, R.feautures
+FROM Rooms R
+LEFT JOIN Bookings B
+    ON R.room_number = B.room_number
+    AND R.building = B.building
+    AND NOT (B.end_time <= '2025-10-11 09:00:00' OR B.start_time >= '2025-10-11 10:00:00')
+WHERE B.booking_id IS NULL;
 
 -- Find Rooms that are free in a building given a time range
 -- SELECT R.room_number, R.building, R.capacity, R.feautures
@@ -81,4 +67,84 @@ INSERT INTO Bookings (room_number, building, start_time, end_time, course_code, 
 --     AND B.start_time > '2025-10-11 09:00:00'
 -- GROUP BY F.room_number, F.building, F.capacity, F.feautures
 -- ORDER BY F.room_number;
+
+-- Gets number of free rooms per building
+SELECT
+    R.building,
+    COUNT(*) AS free_room_count
+FROM Rooms R
+LEFT JOIN Bookings B
+    ON R.room_number = B.room_number
+    AND R.building = B.building
+    -- Detect overlapping bookings
+    AND NOT (
+        B.end_time   <= '2025-12-11 09:00:00' OR
+        B.start_time >= '2025-12-11 10:00:00'
+    )
+WHERE B.booking_id IS NULL       -- Means: no conflicting booking
+GROUP BY R.building
+ORDER BY free_room_count DESC;   -- optional
+
+
+-- Query RPCs
+
+-- Function 1: Count free rooms per building
+CREATE OR REPLACE FUNCTION free_rooms_per_building(
+  p_start timestamp,
+  p_end timestamp
+)
+RETURNS TABLE(building text, free_room_count bigint)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    r.building::text,
+    COUNT(*)::bigint as free_room_count
+  FROM Rooms r
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM Bookings b
+    WHERE b.room_number = r.room_number
+      AND b.building = r.building
+      AND b.start_time < p_end
+      AND b.end_time > p_start
+  )
+  GROUP BY r.building
+  ORDER BY r.building;
+END;
+$$;
+
+-- Function 2: List all free rooms
+CREATE OR REPLACE FUNCTION free_rooms_list(
+  p_start timestamp,
+  p_end timestamp
+)
+RETURNS TABLE(
+  room_number integer,
+  building text,
+  capacity integer,
+  features text
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    r.room_number,
+    r.building::text,
+    r.capacity,
+    r.features::text
+  FROM Rooms r
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM Bookings b
+    WHERE b.room_number = r.room_number
+      AND b.building = r.building
+      AND b.start_time < p_end
+      AND b.end_time > p_start
+  )
+  ORDER BY r.building, r.room_number;
+END;
+$$;
 
