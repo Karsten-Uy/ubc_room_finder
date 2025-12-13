@@ -54,7 +54,7 @@ export default function DisclaimerWidget({ title = "Disclaimer", text }: Disclai
     <div className="p-6 mt-4 w-full max-w-4xl mx-auto bg-yellow-100 dark:bg-yellow-900 rounded-xl shadow-md border border-yellow-300 dark:border-yellow-600 mb-6">
       <h2 className="text-xl font-bold mb-2 text-yellow-900 dark:text-yellow-100">{title}</h2>      
       <p className="text-gray-800 dark:text-gray-200">
-        This site is for informational purposes only. Room availability may be inaccurate or outdated, always confirm with official sources. Data comes from the{" "}
+        This site is for informational purposes only. Room availability may be inaccurate or outdated, so always confirm with official sources. Data comes from the{" "}
         <a
           href="https://sws-van.as.it.ubc.ca/SWS_2025/"
           target="_blank"
@@ -63,8 +63,9 @@ export default function DisclaimerWidget({ title = "Disclaimer", text }: Disclai
         >
           UBC Online Timetable
         </a>{" "}
-        via a web scraper. Schedules may change during exams or at the start of the year. If data seems outdated, click the "Report Issue" button, select "Request latest room data," and submit the form. I will update the database when I can. Rooms marked free may still be occupied.
+        and is captured as a snapshot. Schedules can change during exams, at the start of the year, or at other times, and this site updates only when I manually refresh the data. If it seems outdated, click "Report Issue," select "Request latest room data," and submit the form. I will update the database when I get the time. Rooms marked free may still be occupied.
       </p>
+
 
       <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">
         {lastUpdated ? `Database last updated on ${lastUpdated}.` : 'Fetching last update...'}<br />
