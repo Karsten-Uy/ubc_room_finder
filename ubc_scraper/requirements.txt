@@ -1,0 +1,18 @@
+# Requirements for the UBC Online Timetable Scraper (CSV Version)
+# Used Python 3.11.4 for initial dev
+
+# For web browsing and interaction (Phase 1)
+selenium
+
+# For parsing HTML content (Phase 2)
+beautifulsoup4
+
+# Note: The following packages are part of Python's Standard Library
+# and do not need to be listed here:
+# - re (Regular Expressions)
+# - datetime, timedelta
+# - os
+# - json
+# - csv
+# - argparse
+# - concurrent.futures (ThreadPoolExecutor)
