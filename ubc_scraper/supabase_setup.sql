@@ -1,41 +1,3 @@
--- DROPING TABLES
-DROP TABLE IF EXISTS Bookings CASCADE;
-DROP TABLE IF EXISTS Rooms CASCADE;
-
--- Table for Rooms
-CREATE TABLE Rooms (
-    room_number VARCHAR(50),
-    building VARCHAR(50),
-    capacity INT,
-    features VARCHAR(1000),
-    PRIMARY KEY (room_number,building)
-);
-
--- Table for Bookings
-CREATE TABLE Bookings (
-    booking_id SERIAL PRIMARY KEY,
-    room_number VARCHAR(50),
-    building VARCHAR(50),
-    FOREIGN KEY (room_number,building) REFERENCES Rooms,
-    start_time  TIMESTAMP,
-    end_time    TIMESTAMP,
-    course_code VARCHAR(100),
-    instructor VARCHAR(100),
-    booking_type VARCHAR(20) -- e.g., LEC, MAINT
-);
-
-
-alter table Rooms enable row level security;
-create policy "Allow public read access" on Rooms
-for select
-using (true);
-
-alter table Bookings enable row level security;
-create policy "Allow public read access" on Bookings
-for select
-using (true);
-
-
 -- Drop old functions if they exist
 DROP FUNCTION IF EXISTS public.free_rooms_per_building(timestamp, timestamp) CASCADE;
 DROP FUNCTION IF EXISTS public.free_rooms_list(timestamp, timestamp) CASCADE;
@@ -135,7 +97,7 @@ BEGIN
       AND b.start_time < p_end
       AND b.end_time > p_start
   )
-  ORDER BY fc.free_room_count DESC, r.building ASC, r.room_number ASC;
+  ORDER BY fc.free_room_count DESC, r.building ASC, earliest_booking ASC NULLS FIRST r.room_number ASC;
 END;
 $$;
 
