@@ -1,109 +1,109 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# UBC Room Finder Project
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+## ✨ Project Summary
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+The **UBC Room Finder Project** is a full-stack solution designed to quickly identify available classroom and lecture spaces at UBC. The project is split into two parts:
 
-## Features
+1.  **Data Ingestion (Backend):** A Python web scraper collects room booking and facility data from the [UBC Online Timetable](https://sws-van.as.it.ubc.ca/SWS_2025/).
+2.  **Web Application (Frontend):** A Next.js application powered by Supabase and deployed on **Vercel** allows users to dynamically search, filter, and view free rooms based on date and time. This system helps students and staff find immediate, unscheduled room access.
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Proxy
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+## 🚀 Technologies Used
 
-## Demo
+This project utilizes a modern stack across scraping, data storage, and presentation:
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+| Component | Technology | Role |
+| :--- | :--- | :--- |
+| **Scraping** | **Python**, **Selenium**, **BeautifulSoup** | Automation, data extraction, and parsing from the [UBC Online Timetable](https://sws-van.as.it.ubc.ca/SWS_2025/). |
+| **Database** | **Supabase** (PostgreSQL) | Primary data storage, hosting `rooms` and `bookings` tables, and running query logic via stored procedures (RPCs).  |
+| **Frontend** | **Next.js** (React) | Application framework for server-side rendering (SSR) and routing. |
+| **Deployment** | **Vercel** | Hosting and automated deployment of the Next.js application. |
+| **Styling/UI** | **Tailwind CSS** (Implied by code) | Utility-first CSS framework for rapid UI development. |
 
-## Deploy to Vercel
+---
 
-Vercel deployment will guide you through creating a Supabase account and project.
+## 📁 Project Structure
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+The project directory contains:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+| Directory/File | Description |
+| :--- | :--- |
+| `ubc_scraper/` | Contains the Python web scraper script and its dedicated `README.md` with instructions on setup and execution. |
+| `supabase_setup.sql` | SQL file for setting up the necessary tables and stored procedures in your Supabase database. |
+| `components/` | (In Next.js app) Contains the React components like `FreeRoomsWidget` and `DisclaimerWidget`. |
+| `.env.local` | Configuration file for the Next.js app (must contain Supabase credentials). |
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+---
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+## 💻 Part 1: Data Scraping (Backend)
 
-## Clone and run locally
+The scraper collects room availability data from the [UBC Online Timetable](https://sws-van.as.it.ubc.ca/SWS_2025/) website. This process is necessary to populate the database used by the web application and should be rerun whenever the schedule has changed significalty such as during the start of the year and once exam schedules come out. To see how to run it and upload the data to supabase, see the `README.md` in the `ubc_scraper/` directory.
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+## 🌐 Part 2: Web Application (Frontend)
 
-2. Create a Next.js app using the Supabase Starter template npx command
+The frontend is a Next.js application designed to query the Supabase database and display the room availability data.
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+### 1. Prerequisites (Web App)
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+* **Node.js (LTS)** and **npm** or **Yarn/pnpm**.
+* **Supabase Project** with the tables/functions set up (see Part 2).
+* **Vercel** for deployment
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+### 2. Configuration
 
-3. Use `cd` to change into the app's directory
+1.  **Supabase Environment Variables:** Create a file named `.env.local` in the **root directory** of the project (if it doesn't exist) and populate it with your Supabase credentials:
 
-   ```bash
-   cd with-supabase-app
-   ```
+    ```bash
+    NEXT_PUBLIC_SUPABASE_URL="YOUR_SUPABASE_URL"
+    NEXT_PUBLIC_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
+    ```
 
-4. Rename `.env.example` to `.env.local` and update the following:
+### 3. Installation and Running
 
-  ```env
-  NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=[INSERT SUPABASE PROJECT API PUBLISHABLE OR ANON KEY]
-  ```
-  > [!NOTE]
-  > This example uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, which refers to Supabase's new **publishable** key format.
-  > Both legacy **anon** keys and new **publishable** keys can be used with this variable name during the transition period. Supabase's dashboard may show `NEXT_PUBLIC_SUPABASE_ANON_KEY`; its value can be used in this example.
-  > See the [full announcement](https://github.com/orgs/supabase/discussions/29260) for more information.
+1.  **Navigate to Root Directory:** Ensure you are in the root directory of the project.
+2.  **Install Dependencies:**
+    ```bash
+    npm install
+    # or yarn install / pnpm install
+    ```
+3.  **Run the Development Server:**
+    ```bash
+    npm run dev
+    # or yarn dev / pnpm dev
+    ```
+    The application will be accessible at `http://localhost:3000`.
 
-  Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+### 4. Deployment
 
-5. You can now run the Next.js local development server:
+The application is built with Next.js and is optimized for deployment on **Vercel**.
 
-   ```bash
-   npm run dev
-   ```
+1.  **Link to Vercel:** Initialize a new Vercel project linked to this Git repository.
+2.  **Configure Environment Variables:** In your Vercel project settings, set the `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as environment variables.
+3.  **Deploy:** Vercel will automatically build and deploy the application.
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+---
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+## 🔍 Frontend Feature Overview
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+The application features two main components, built in React/Next.js:
 
-## Feedback and issues
+### 1. `FreeRoomsWidget`
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+This is the core search interface, which uses client-side logic and Supabase RPCs to deliver dynamic results.
 
-## More Supabase examples
+| Feature | Description |
+| :--- | :--- |
+| **Search Functionality** | Calls Supabase Remote Procedure Calls (RPCs) to fetch available rooms based on user-selected date/time range (7:00 AM to 10:00 PM). |
+| **Time Sync** | Automatically adjusts the end time to maintain duration when the start time is edited, and vice-versa. |
+| **Building Filter** | Displays a count of free rooms per building and allows filtering of the main room list by clicking a building name. |
+| **Room Details** | Provides a link to the UBC Learning Spaces website for specific room details. |
+| **Earliest Booking** | Shows the next scheduled booking time for the room (for the rest of the search day). |
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+### 2. `DisclaimerWidget`
+
+This component displays important information regarding the data's source and validity.
+
+| Data Point | Source |
+| :--- | :--- |
+| **Data Range** | Dynamically reports the **Earliest Booking Start Time** and **Latest Booking End Time** currently in the `bookings` table. |
+| **Last Modified Time** | Dynamically fetched from Supabase table metadata. |
+| **Warning** | Explicitly states that the data is for informational purposes only and must be confirmed with official UBC sources. |

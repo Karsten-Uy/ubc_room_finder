@@ -49,8 +49,7 @@ export default function Home() {
               rel="noopener noreferrer"
               className="mt-2 sm:mt-0 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-sm sm:text-base text-center"
             >
-              <span className="sm:hidden">Report</span>
-              <span className="hidden sm:inline">Report Issue</span>
+              <span>Report Issue</span>
             </a>
         </footer>
       </div>

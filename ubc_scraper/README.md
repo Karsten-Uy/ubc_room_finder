@@ -4,9 +4,9 @@
 
 This is a data collection web scraper script that extracts room booking and room specification data from the official UBC online timetable at `https://sws-van.as.it.ubc.ca/SWS_2025/`. It uses **Selenium** for web automation and **BeautifulSoup** for efficient HTML parsing.
 
-Upon successful completion, it processes and exports the collected information into two structured CSV files:
-* `rooms.csv` (Contains permanent room details like capacity and features)
-* `bookings.csv` (Contains temporary booking records with start/end times and course details)
+Upon successful completion, it processes and exports the collected information into two structured CSV files in the `output/` folder:
+* `output/rooms_[TIMESTAMP].csv` (Contains permanent room details like capacity and features)
+* `output/bookings_[TIMESTAMP].csv` (Contains temporary booking records with start/end times and course details)
 
 These files are designed to be easily imported directly into a database (such as a Supabase backend for a web application).
 
@@ -73,8 +73,8 @@ The script is expected to take approximately **1.5 hours** to complete the full 
 
 Once finished, the following files will be created or overwritten in the script directory:
 
-* `rooms.csv`
-* `bookings.csv`
+* `output/rooms_[TIMESTAMP].csv`
+* `output/bookings_[TIMESTAMP].csv`
 
 ---
 *Note: The script also generates an `html_cache` directory containing raw HTML files, allowing for faster subsequent parsing if the Selenium download step is skipped.*
@@ -86,9 +86,9 @@ The final step is loading the collected data into your database instance.
 1.  **Run Setup SQL:**
     In the Supabase interface for your UBC Room Finder instance, navigate to the **SQL Editor**. Run the commands contained in the `supabase_setup.sql` file. This drops the previous tables and recreates them (`rooms` and `bookings`). If just adding new data, can skip this step
 
-2.  **Import `rooms.csv`:**
-    Go to the **Table Editor**, find the `rooms` table, and use the **Import Data** feature to upload and insert the data from your generated `rooms.csv` file.
+2.  **Import `rooms_[TIMESTAMP].csv`:**
+    Go to the **Table Editor**, find the `rooms` table, and use the **Import Data** feature to upload and insert the data from your generated `rooms_[TIMESTAMP].csv` file.
 
-3.  **Import `bookings.csv`:**
-    Repeat the process for the `bookings` table, importing the data from your generated `bookings.csv` file.
+3.  **Import `bookings_[TIMESTAMP].csv`:**
+    Repeat the process for the `bookings` table, importing the data from your generated `bookings_[TIMESTAMP].csv` file.
 
