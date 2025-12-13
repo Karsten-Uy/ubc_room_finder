@@ -17,7 +17,7 @@ This project utilizes a modern stack across scraping, data storage, and presenta
 | **Database** | **Supabase** (PostgreSQL) | Primary data storage, hosting `rooms` and `bookings` tables, and running query logic via stored procedures (RPCs).  |
 | **Frontend** | **Next.js** (React) | Application framework for server-side rendering (SSR) and routing. |
 | **Deployment** | **Vercel** | Hosting and automated deployment of the Next.js application. |
-| **Styling/UI** | **Tailwind CSS** (Implied by code) | Utility-first CSS framework for rapid UI development. |
+| **Styling/UI** | **Tailwind CSS** | Utility-first CSS framework for rapid UI development. |
 
 ---
 
