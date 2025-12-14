@@ -108,7 +108,6 @@ export default function FreeRoomsWidget() {
   useEffect(() => {
     if (!typingStart) return
     const timer = setTimeout(() => {
-      // --- CHANGE 1: DO NOT CLAMP WHILE TYPING ---
       const newStart = typingStart
       
       let [h, m] = newStart.split(":").map(Number)
@@ -132,7 +131,6 @@ export default function FreeRoomsWidget() {
   useEffect(() => {
     if (!typingEnd) return
     const timer = setTimeout(() => {
-      // --- CHANGE 2: DO NOT CLAMP WHILE TYPING ---
       const newEnd = typingEnd
 
       // Use current startTime (which may be raw, un-clamped) to calculate delta
@@ -254,6 +252,7 @@ export default function FreeRoomsWidget() {
   const toggleBuilding = (building: string) => {
     setSelectedBuilding((prev) => (prev === building ? null : building))
     setCurrentRoomPage(1) // Reset room list page when the filter changes
+    // DON'T reset building page - removed setCurrentBuildingPage(1)
   }
 
   const filteredRooms = selectedBuilding
@@ -281,10 +280,8 @@ export default function FreeRoomsWidget() {
     }
   }
   
-  // Reset to page 1 when search changes, and auto-select if only 1 result
+  // Reset to page 1 ONLY when search changes, and auto-select if only 1 result
   useEffect(() => {
-    setCurrentBuildingPage(1)
-    
     const filtered = perBuilding.filter((row) =>
       row.building.toLowerCase().includes(buildingSearch.toLowerCase())
     )
@@ -301,6 +298,11 @@ export default function FreeRoomsWidget() {
       setSelectedBuilding(null)
     }
   }, [buildingSearch, perBuilding, selectedBuilding])
+  
+  // Separate effect to reset page only when buildingSearch changes
+  useEffect(() => {
+    setCurrentBuildingPage(1)
+  }, [buildingSearch])
 
   // --- PAGINATION LOGIC FOR FREE ROOMS LIST TABLE ---
   const totalRoomPages = Math.ceil(filteredRooms.length / ROWS_PER_PAGE)
@@ -351,7 +353,6 @@ export default function FreeRoomsWidget() {
             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Start Time</label>
             <input
               type="time"
-              // Removed min/max attributes here to allow user input beyond limits
               value={typingStart ?? startTime}
               onChange={(e) => setTypingStart(e.target.value)}
               className={`w-full px-2 sm:px-3 py-1 sm:py-2 border rounded-md focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 ${invalidField === "start" ? "border-red-500" : ""}`}
@@ -362,7 +363,6 @@ export default function FreeRoomsWidget() {
             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">End Time</label>
             <input
               type="time"
-              // Removed min/max attributes here to allow user input beyond limits
               value={typingEnd ?? endTime}
               onChange={(e) => setTypingEnd(e.target.value)}
               className={`w-full px-2 sm:px-3 py-1 sm:py-2 border rounded-md focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 ${invalidField === "end" ? "border-red-500" : ""}`}
@@ -407,7 +407,6 @@ export default function FreeRoomsWidget() {
             </tr>
           </thead>
           <tbody>
-            {/* Use paginatedBuildings for rendering */}
             {paginatedBuildings.map((row) => {
               const isSelected = selectedBuilding === row.building
               return (
@@ -444,7 +443,7 @@ export default function FreeRoomsWidget() {
         </table>
       </div>
 
-      {/* Pagination Controls for Building Count - UPDATED DISPLAY */}
+      {/* Pagination Controls for Building Count */}
       {totalBuildingPages > 1 && (
         <div className="mt-4 mb-6 flex justify-between items-center text-gray-700 dark:text-gray-300">
           <span>
@@ -469,7 +468,7 @@ export default function FreeRoomsWidget() {
         </div>
       )}
 
-      {/* All Free Rooms / Filtered (PAGINATED) - REMOVED TOTAL COUNT FROM HEADING */}
+      {/* All Free Rooms / Filtered (PAGINATED) */}
       <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100" id="free-rooms-table">
         {selectedBuilding ? `Free Rooms in ${selectedBuilding}` : "All Free Rooms"}
       </h2>
@@ -485,7 +484,6 @@ export default function FreeRoomsWidget() {
             </tr>
           </thead>
           <tbody>
-            {/* Map over paginatedRooms */}
             {paginatedRooms.map((room, i) => (
               <tr key={roomStartIndex + i} className="hover:bg-gray-200 dark:hover:bg-gray-700">
                 <td className="px-3 py-2 border">{room.building}</td>
@@ -512,7 +510,7 @@ export default function FreeRoomsWidget() {
         </table>
       </div>
 
-      {/* Pagination Controls for Free Rooms List - UPDATED DISPLAY */}
+      {/* Pagination Controls for Free Rooms List */}
       {totalRoomPages > 1 && (
         <div className="mt-4 flex justify-between items-center text-gray-700 dark:text-gray-300">
           <span>
