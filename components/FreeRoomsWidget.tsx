@@ -296,15 +296,9 @@ export default function FreeRoomsWidget() {
     } else if (filtered.length === 0) {
       // Clear selection if no results
       setSelectedBuilding(null)
-    } else if (selectedBuilding) {
-      // If there are multiple results now, check if selected building is still in results
-      if (!filtered.some(b => b.building === selectedBuilding)) {
-        // If the currently selected building is no longer in filtered results, clear selection
-        setSelectedBuilding(null)
-      } else if (buildingSearch === '') {
-        // If search is cleared (showing all buildings), reset selection
-        setSelectedBuilding(null)
-      }
+    } else if (selectedBuilding && !filtered.some(b => b.building === selectedBuilding)) {
+      // If the currently selected building is no longer in filtered results, clear selection
+      setSelectedBuilding(null)
     }
   }, [buildingSearch, perBuilding, selectedBuilding])
 
