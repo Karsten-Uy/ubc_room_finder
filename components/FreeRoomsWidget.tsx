@@ -43,6 +43,9 @@ export default function FreeRoomsWidget() {
   // Separate states for pagination: one for buildings, one for rooms
   const [currentBuildingPage, setCurrentBuildingPage] = useState(1)
   const [currentRoomPage, setCurrentRoomPage] = useState(1)
+  
+  // Building search filter
+  const [buildingSearch, setBuildingSearch] = useState<string>('')
 
   // --- NEW HELPER FUNCTION FOR MAP LINK ---
   const formatBuildingMapLink = (building: string) =>
@@ -65,8 +68,13 @@ export default function FreeRoomsWidget() {
     startTimeStr = initialClamp(startTimeStr)
     endTimeStr = initialClamp(endTimeStr)
 
+    // Format date as YYYY-MM-DD using local timezone
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    const localDateStr = `${year}-${month}-${day}`
 
-    setSelectedDate(now.toISOString().slice(0, 10))
+    setSelectedDate(localDateStr)
     setStartTime(startTimeStr)
     setEndTime(endTimeStr)
 
@@ -76,7 +84,7 @@ export default function FreeRoomsWidget() {
       (parseInt(startTimeStr.slice(0, 2)) * 60 + parseInt(startTimeStr.slice(3)))
     setStartDelta(deltaMinutes)
 
-    fetchData(now.toISOString().slice(0, 10), startTimeStr, endTimeStr)
+    fetchData(localDateStr, startTimeStr, endTimeStr)
   }, [])
 
   const clampWithWarning = (value: string, field: "start" | "end", showWarning: boolean = false): string => {
@@ -255,11 +263,16 @@ export default function FreeRoomsWidget() {
   const formatRoomLink = (building: string, room_number: string) =>
     `https://learningspaces.ubc.ca/find-a-space/?classroom=${building.toLowerCase()}-${room_number}`
 
+  // --- FILTER BUILDINGS BY SEARCH ---
+  const filteredBuildings = perBuilding.filter((row) =>
+    row.building.toLowerCase().includes(buildingSearch.toLowerCase())
+  )
+
   // --- PAGINATION LOGIC FOR BUILDING COUNT TABLE ---
-  const totalBuildingPages = Math.ceil(perBuilding.length / ROWS_PER_PAGE)
+  const totalBuildingPages = Math.ceil(filteredBuildings.length / ROWS_PER_PAGE)
   const buildingStartIndex = (currentBuildingPage - 1) * ROWS_PER_PAGE
   const buildingEndIndex = buildingStartIndex + ROWS_PER_PAGE
-  const paginatedBuildings = perBuilding.slice(buildingStartIndex, buildingEndIndex)
+  const paginatedBuildings = filteredBuildings.slice(buildingStartIndex, buildingEndIndex)
 
   const handleBuildingPageChange = (page: number) => {
     if (page >= 1 && page <= totalBuildingPages) {
@@ -267,6 +280,11 @@ export default function FreeRoomsWidget() {
       document.querySelector('#building-count-table')?.scrollIntoView({ behavior: 'smooth' })
     }
   }
+  
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentBuildingPage(1)
+  }, [buildingSearch])
 
   // --- PAGINATION LOGIC FOR FREE ROOMS LIST TABLE ---
   const totalRoomPages = Math.ceil(filteredRooms.length / ROWS_PER_PAGE)
@@ -293,7 +311,12 @@ export default function FreeRoomsWidget() {
 
   return (
     <div className="mb-6 p-6 w-full max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-      <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Free Room Search</h1>
+      <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">Free Room Search</h1>
+      
+      {/* Description */}
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+        Find available rooms on campus by selecting a date and time range. By default, the search shows rooms available for the next 3 hours. Click a building in the “Free Rooms Per Building” table to filter free room results by that building. Note that the times are only accurate in PST/PDT.
+      </p>
 
       {/* Date/Time Inputs (unchanged) */}
       <div className="mb-6 space-y-4">
@@ -346,6 +369,18 @@ export default function FreeRoomsWidget() {
 
       {/* Free Rooms Per Building (PAGINATED) */}
       <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100" id="building-count-table">Free Rooms Per Building</h2>
+      
+      {/* Building Search Bar */}
+      <div className="mb-3">
+        <input
+          type="text"
+          placeholder="Search buildings..."
+          value={buildingSearch}
+          onChange={(e) => setBuildingSearch(e.target.value)}
+          className="w-full sm:w-64 px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+        />
+      </div>
+      
       <div className="overflow-x-auto mb-2">
         <table className="w-full min-w-[300px] border-collapse border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
           <thead className="bg-gray-800 text-white">
@@ -397,7 +432,7 @@ export default function FreeRoomsWidget() {
       {totalBuildingPages > 1 && (
         <div className="mt-4 mb-6 flex justify-between items-center text-gray-700 dark:text-gray-300">
           <span>
-            Showing {buildingStartIndex + 1} - {Math.min(buildingEndIndex, perBuilding.length)} of {perBuilding.length} results
+            Showing {buildingStartIndex + 1} - {Math.min(buildingEndIndex, filteredBuildings.length)} of {filteredBuildings.length} results
           </span>
           <div className="flex space-x-2">
             <button

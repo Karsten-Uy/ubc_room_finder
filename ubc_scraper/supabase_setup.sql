@@ -35,13 +35,31 @@ create policy "Allow public read access" on Bookings
 for select
 using (true);
 
+--------------------------------------------------------------------
+-- INDICIES FOR QUERY OPTIMIZATION
+--------------------------------------------------------------------
+
+-- 1. For the Anti-Join (Overlap Check)
+CREATE INDEX IF NOT EXISTS idx_bookings_overlap 
+ON public.bookings (building, room_number, start_time, end_time);
+
+-- 2. For the Lateral Join (Next Booking Lookup)
+CREATE INDEX IF NOT EXISTS idx_bookings_next_time 
+ON public.bookings (building, room_number, start_time);
+
+-- Optional but recommended for the main table lookup
+CREATE INDEX IF NOT EXISTS idx_rooms_pk ON public.rooms (building, room_number);
+
+--------------------------------------------------------------------
+-- QUERIES
+--------------------------------------------------------------------
 
 -- Drop old functions if they exist
 DROP FUNCTION IF EXISTS public.free_rooms_per_building(timestamp, timestamp) CASCADE;
 DROP FUNCTION IF EXISTS public.free_rooms_list(timestamp, timestamp) CASCADE;
 DROP FUNCTION IF EXISTS public.get_table_last_modified() CASCADE;
 
--- Function: free_rooms_per_building (LIMITED TO 100 RESULTS)
+-- Function: Gets free rooms per building
 CREATE OR REPLACE FUNCTION public.free_rooms_per_building(
   p_start timestamp,
   p_end timestamp
@@ -65,22 +83,11 @@ BEGIN
       AND b.end_time > p_start
   )
   GROUP BY r.building
-  ORDER BY free_room_count DESC, building ASC
-  LIMIT 100;
+  ORDER BY free_room_count DESC, building ASC;
 END;
 $function$;
 
--- 1. For the Anti-Join (Overlap Check)
-CREATE INDEX IF NOT EXISTS idx_bookings_overlap 
-ON public.bookings (building, room_number, start_time, end_time);
-
--- 2. For the Lateral Join (Next Booking Lookup)
-CREATE INDEX IF NOT EXISTS idx_bookings_next_time 
-ON public.bookings (building, room_number, start_time);
-
--- Optional but recommended for the main table lookup
-CREATE INDEX IF NOT EXISTS idx_rooms_pk ON public.rooms (building, room_number);
-
+-- Function: Gets the free rooms given a time 
 CREATE OR REPLACE FUNCTION public.free_rooms_list(
   p_start timestamp,
   p_end timestamp
@@ -135,11 +142,11 @@ BEGIN
       AND b.start_time < p_end
       AND b.end_time > p_start
   )
-  ORDER BY fc.free_room_count DESC, r.building ASC, r.room_number ASC;
+  ORDER BY fc.free_room_count DESC, r.building ASC, earliest_booking ASC NULLS FIRST, r.room_number ASC;
 END;
 $$;
 
--- Function: get_table_last_modified
+-- Function: Gets the last time the DB was modified
 CREATE OR REPLACE FUNCTION get_table_last_modified()
 RETURNS TABLE(last_autoanalyze timestamptz, last_autovacuum timestamptz) 
 LANGUAGE sql
