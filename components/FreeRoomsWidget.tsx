@@ -281,10 +281,32 @@ export default function FreeRoomsWidget() {
     }
   }
   
-  // Reset to page 1 when search changes
+  // Reset to page 1 when search changes, and auto-select if only 1 result
   useEffect(() => {
     setCurrentBuildingPage(1)
-  }, [buildingSearch])
+    
+    const filtered = perBuilding.filter((row) =>
+      row.building.toLowerCase().includes(buildingSearch.toLowerCase())
+    )
+    
+    // Auto-select building if search results in exactly 1 building
+    if (filtered.length === 1) {
+      setSelectedBuilding(filtered[0].building)
+      setCurrentRoomPage(1)
+    } else if (filtered.length === 0) {
+      // Clear selection if no results
+      setSelectedBuilding(null)
+    } else if (selectedBuilding) {
+      // If there are multiple results now, check if selected building is still in results
+      if (!filtered.some(b => b.building === selectedBuilding)) {
+        // If the currently selected building is no longer in filtered results, clear selection
+        setSelectedBuilding(null)
+      } else if (buildingSearch === '') {
+        // If search is cleared (showing all buildings), reset selection
+        setSelectedBuilding(null)
+      }
+    }
+  }, [buildingSearch, perBuilding, selectedBuilding])
 
   // --- PAGINATION LOGIC FOR FREE ROOMS LIST TABLE ---
   const totalRoomPages = Math.ceil(filteredRooms.length / ROWS_PER_PAGE)
@@ -315,7 +337,7 @@ export default function FreeRoomsWidget() {
       
       {/* Description */}
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-        Find available rooms on campus by selecting a date and time range. By default, the search shows rooms available for the next 3 hours. Click a building in the “Free Rooms Per Building” table to filter free room results by that building. Note that the times are only accurate in PST/PDT.
+        Find available rooms on campus by selecting a date and time range. Click on a building to filter rooms, or use the search bar to quickly find specific buildings. Click on room details to view more information about each space.
       </p>
 
       {/* Date/Time Inputs (unchanged) */}

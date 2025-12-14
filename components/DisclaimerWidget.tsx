@@ -81,7 +81,7 @@ export default function DisclaimerWidget({ title = "Disclaimer", text }: Disclai
         <span className="font-bold italic text-red-600 dark:text-red-400">
           Please do not share this site widely. 
         </span>{" "}
-        This site runs on Vercel and Supabase free tiers, so sharing could incur costs. If you want it expanded and are willing to help, send a request via the "Report Issue" button and we can discuss.
+        This site runs on the free tiers of Vercel and Supabase, so heavy usage or widespread sharing may incur costs. Additionally, increased usage may result in fewer rooms actually being unoccupied.
       </p>
     </div>
   )
